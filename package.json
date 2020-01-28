@@ -1,0 +1,31 @@
+{
+  "name": "@sveltech/ssr",
+  "version": "0.0.0",
+  "description": "JSDOM SSR renderer for Svelte",
+  "main": "ssr.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sveltech/ssr.git"
+  },
+  "keywords": [
+    "svelte",
+    "ssr",
+    "jsdom",
+    "router"
+  ],
+  "author": "jakobrosenberg@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sveltech/ssr/issues"
+  },
+  "homepage": "https://github.com/sveltech/ssr#readme",
+  "dependencies": {
+    "bufferutil": "^4.0.1",
+    "jsdom": "^16.0.1",
+    "utf-8-validate": "^5.0.2",
+    "canvas": "file:./canvas"
+  }
+}
