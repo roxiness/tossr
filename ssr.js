@@ -1,6 +1,6 @@
 const { JSDOM } = require('jsdom')
 
-module.export.ssr = async function ssr(template, script, url, eventName = 'app-loaded') {
+module.exports.ssr = async function ssr(template, script, url, eventName = 'app-loaded') {
     url = url.replace(/^\/\.netlify\/functions\/get-html/, '')
 
     return new Promise(async (resolve, reject) => {
