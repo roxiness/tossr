@@ -24,8 +24,8 @@
   "homepage": "https://github.com/sveltech/ssr#readme",
   "dependencies": {
     "bufferutil": "^4.0.1",
+    "canvas": "git+https://github.com/sveltech/dummy-module.git",
     "jsdom": "^16.0.1",
-    "utf-8-validate": "^5.0.2",
-    "canvas": "file:./canvas"
+    "utf-8-validate": "^5.0.2"
   }
 }
