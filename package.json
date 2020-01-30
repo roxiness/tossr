@@ -26,6 +26,7 @@
     "bufferutil": "^4.0.1",
     "canvas": "git+https://github.com/sveltech/dummy-module.git",
     "jsdom": "^16.0.1",
+    "node-fetch": "^2.6.0",
     "utf-8-validate": "^5.0.2"
   }
 }

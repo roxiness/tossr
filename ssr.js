@@ -1,5 +1,6 @@
 const { JSDOM } = require('jsdom')
 const fs = require('fs')
+const fetch = require('node-fetch')
 
 const defaults = {
     host: 'http://jsdom.ssr',
@@ -20,6 +21,7 @@ module.exports.ssr = async function ssr(template, script, url, options) {
         try {
             const dom = await new JSDOM(template, { runScripts: "outside-only", url: host + url })
             dom.window.requestAnimationFrame = () => { }
+            dom.window.fetch = fetch
             dom.window.addEventListener(eventName, async () => {
                 afterEval(dom)
                 const html = dom.serialize()
