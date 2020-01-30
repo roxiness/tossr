@@ -1,14 +1,20 @@
 const { JSDOM } = require('jsdom')
+const fs = require('fs')
+
+const defaults = {
+    host: 'http://jsdom.ssr',
+    eventName: 'app-loaded',
+    beforeEval() { },
+    afterEval() { },
+    meta: { 'data-render': 'ssr' }
+}
 
 module.exports.ssr = async function ssr(template, script, url, options) {
-    const { host, eventName, beforeEval, afterEval, meta } = {
-        host: 'http://jsdom.ssr',
-        eventName: 'app-loaded',
-        beforeEval() { },
-        afterEval() { },
-        meta: { 'data-render': 'ssr' },
-        ...options
-    }
+    const { host, eventName, beforeEval, afterEval, meta } = { ...defaults, ...options }
+
+    // is this the file or the path to the file?
+    template = fs.existsSync(template) ? fs.readFileSync(template, 'utf8') : template
+    script = fs.existsSync(script) ? fs.readFileSync(script, 'utf8') : script
 
     return new Promise(async (resolve, reject) => {
         try {
