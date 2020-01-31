@@ -10,6 +10,36 @@ const defaults = {
     meta: { 'data-render': 'ssr' }
 }
 
+/**
+ * Called before the app script is evaluated
+ * @async
+ * @name beforeEval
+ * @function
+ * @param {object} dom The DOM object
+*/
+
+/**
+ * Called after the app script is evaluated
+ * @name afterEval
+ * @function
+ * @param {object} dom The DOM object
+*/
+
+/**
+ * Renders an HTML page from a HTML template, an app bundle and a path
+ *
+ * @async
+ * @param {string} template Html template (or path to a HTML template).
+ * @param {string} script Bundled JS app (or path to bundled bundle JS app).
+ * @param {string} url Path to render. Ie. /blog/breathing-oxygen-linked-to-staying-alive
+ * @param {object=} options Options
+ * @param {string=} options.host hostname to use while rendering. Defaults to http://jsdom.ssr
+ * @param {string=} options.eventName event to wait for before rendering app. Defaults to 'app-loaded'
+ * @param {domFn=} options.beforeEval Executed before script is evaluated.
+ * @param {domFn=} options.afterEval Executed after script is evaluated.
+ * @param {object=} options.meta Metadata to be applied to the HTML element. Defaults to { 'data-render': 'ssr' }
+ * @returns {string}
+ */
 module.exports.ssr = async function ssr(template, script, url, options) {
     const { host, eventName, beforeEval, afterEval, meta } = { ...defaults, ...options }
 
