@@ -50,6 +50,7 @@ module.exports.ssr = async function ssr(template, script, url, options) {
     return new Promise(async (resolve, reject) => {
         try {
             const dom = await new JSDOM(template, { runScripts: "outside-only", url: host + url })
+            dom.window.scrollTo = () => { }
             dom.window.requestAnimationFrame = () => { }
             dom.window.fetch = fetch
             dom.window.addEventListener(eventName, async () => {
