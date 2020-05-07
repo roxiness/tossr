@@ -4,7 +4,7 @@
   "description": "JSDOM SSR renderer for Svelte",
   "main": "ssr.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/test.js"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,6 @@
   "homepage": "https://github.com/sveltech/ssr#readme",
   "dependencies": {
     "bufferutil": "^4.0.1",
-    "canvas": "git+https://github.com/sveltech/dummy-module.git",
     "jsdom": "^16.0.1",
     "node-fetch": "^2.6.0",
     "utf-8-validate": "^5.0.2"
