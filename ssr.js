@@ -41,6 +41,7 @@ const defaults = {
  * @returns {string}
  */
 module.exports.ssr = async function ssr(template, script, url, options) {
+    const start = Date.now()
     const { host, eventName, beforeEval, afterEval, meta } = { ...defaults, ...options }
 
     // is this the file or the path to the file?
@@ -52,19 +53,19 @@ module.exports.ssr = async function ssr(template, script, url, options) {
             const dom = await new JSDOM(template, { runScripts: "outside-only", url: host + url })
             dom.window.scrollTo = () => { }
             dom.window.requestAnimationFrame = () => { }
+            dom.window.cancelAnimationFrame = () => { }
             dom.window.fetch = fetch
             dom.window.addEventListener(eventName, async () => {
                 afterEval(dom)
                 const html = dom.serialize()
-                dom.window.close()
                 resolve(html)
+                dom.window.close()
+                console.log(`${url} - ${Date.now() - start}ms`)
             })
             await beforeEval(dom)
             if (meta) setMeta(dom, meta)
             dom.window.eval(script)
-        } catch (err) {
-            throw Error(err)
-        }
+        } catch (err) { handleError(err, url) }
     })
 }
 
@@ -74,4 +75,9 @@ function setMeta(dom, meta) {
         metaElem.setAttribute(key, value)
     })
     dom.window.document.getElementsByTagName('head')[0].appendChild(metaElem)
+}
+
+function handleError(err, url) {
+    console.log('url:', url)
+    throw Error(err)
 }
