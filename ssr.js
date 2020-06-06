@@ -51,6 +51,8 @@ module.exports.ssr = async function ssr(template, script, url, options) {
     return new Promise(async (resolve, reject) => {
         try {
             const dom = await new JSDOM(template, { runScripts: "outside-only", url: host + url })
+            dom.window.rendering = true;
+            dom.window.alert = (_msg) => { };
             dom.window.scrollTo = () => { }
             dom.window.requestAnimationFrame = () => { }
             dom.window.cancelAnimationFrame = () => { }
