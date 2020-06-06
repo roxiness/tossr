@@ -1,6 +1,6 @@
 {
   "name": "@sveltech/ssr",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "JSDOM SSR renderer for Svelte",
   "main": "ssr.js",
   "scripts": {
