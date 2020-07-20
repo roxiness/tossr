@@ -56,6 +56,8 @@ module.exports.ssr = async function ssr(template, script, url, options) {
             dom.window.scrollTo = () => { }
             dom.window.requestAnimationFrame = () => { }
             dom.window.cancelAnimationFrame = () => { }
+            dom.window.TextEncoder = TextEncoder
+            dom.window.TextDecoder = TextDecoder
             dom.window.fetch = fetch
             dom.window.addEventListener(eventName, async () => {
                 afterEval(dom)
