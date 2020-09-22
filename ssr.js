@@ -7,7 +7,8 @@ const defaults = {
     eventName: 'app-loaded',
     beforeEval() { },
     afterEval() { },
-    meta: { 'data-render': 'ssr' }
+    meta: { 'data-render': 'ssr' },
+    silent: false
 }
 
 /**
@@ -38,11 +39,12 @@ const defaults = {
  * @param {domFn=} options.beforeEval Executed before script is evaluated.
  * @param {domFn=} options.afterEval Executed after script is evaluated.
  * @param {object=} options.meta Metadata to be applied to the HTML element. Defaults to { 'data-render': 'ssr' }
+ * @param {bool=} options.silent Don't print timestamps
  * @returns {string}
  */
 module.exports.ssr = async function ssr(template, script, url, options) {
     const start = Date.now()
-    const { host, eventName, beforeEval, afterEval, meta } = { ...defaults, ...options }
+    const { host, eventName, beforeEval, afterEval, meta, silent } = { ...defaults, ...options }
 
     // is this the file or the path to the file?
     template = fs.existsSync(template) ? fs.readFileSync(template, 'utf8') : template
@@ -59,16 +61,22 @@ module.exports.ssr = async function ssr(template, script, url, options) {
             dom.window.TextEncoder = TextEncoder
             dom.window.TextDecoder = TextDecoder
             dom.window.fetch = fetch
-            dom.window.addEventListener(eventName, async () => {
+            if (eventName)
+                dom.window.addEventListener(eventName, resolveHtml)
+            await beforeEval(dom)
+            if (meta) setMeta(dom, meta)
+            dom.window.eval(script)
+            if (!eventName)
+                resolveHtml()
+
+            function resolveHtml() {
                 afterEval(dom)
                 const html = dom.serialize()
                 resolve(html)
                 dom.window.close()
-                console.log(`${url} - ${Date.now() - start}ms`)
-            })
-            await beforeEval(dom)
-            if (meta) setMeta(dom, meta)
-            dom.window.eval(script)
+                if (!silent) console.log(`${url} - ${Date.now() - start}ms`)
+            }
+
         } catch (err) { handleError(err, url) }
     })
 }
