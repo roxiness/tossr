@@ -1,6 +1,6 @@
 {
   "name": "@roxi/ssr",
-  "version": "0.0.12",
+  "version": "0.1.0",
   "description": "JSDOM SSR renderer for Svelte",
   "main": "ssr.js",
   "scripts": {
