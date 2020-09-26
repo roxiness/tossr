@@ -1,6 +1,23 @@
+/**
+ * Called before/after the app script is evaluated
+ * @callback Eval
+ * @param {object} dom The DOM object
+ *
+ * @typedef {object} Config
+ * @prop {string} host hostname to use while rendering. Defaults to http://jsdom.ssr
+ * @prop {string} eventName event to wait for before rendering app. Defaults to 'app-loaded'
+ * @prop {Eval} beforeEval Executed before script is evaluated.
+ * @prop {Eval} afterEval Executed after script is evaluated.
+ * @prop {object} meta Metadata to be applied to the HTML element. Defaults to { 'data-render': 'ssr' }
+ * @prop {boolean} silent Don't print timestamps
+ * @prop {boolean} inlineDynamicImports required for apps with dynamic imports
+ */
+
 const { JSDOM } = require('jsdom')
-const fs = require('fs')
+const { dirname, resolve } = require('path')
+const { existsSync, readFileSync } = require('fs')
 const fetch = require('node-fetch')
+const getBundlePath = script => resolve(dirname(script), '__roxi-ssr-bundle.js')
 
 const defaults = {
     host: 'http://jsdom.ssr',
@@ -8,59 +25,35 @@ const defaults = {
     beforeEval() { },
     afterEval() { },
     meta: { 'data-render': 'ssr' },
-    silent: false
+    silent: false,
+    inlineDynamicImports: false
 }
 
 /**
- * Called before the app script is evaluated
- * @async
- * @name beforeEval
- * @function
- * @param {object} dom The DOM object
-*/
-
-/**
- * Called after the app script is evaluated
- * @name afterEval
- * @function
- * @param {object} dom The DOM object
-*/
-
-/**
  * Renders an HTML page from a HTML template, an app bundle and a path
- *
- * @async
  * @param {string} template Html template (or path to a HTML template).
  * @param {string} script Bundled JS app (or path to bundled bundle JS app).
  * @param {string} url Path to render. Ie. /blog/breathing-oxygen-linked-to-staying-alive
- * @param {object=} options Options
- * @param {string=} options.host hostname to use while rendering. Defaults to http://jsdom.ssr
- * @param {string=} options.eventName event to wait for before rendering app. Defaults to 'app-loaded'
- * @param {domFn=} options.beforeEval Executed before script is evaluated.
- * @param {domFn=} options.afterEval Executed after script is evaluated.
- * @param {object=} options.meta Metadata to be applied to the HTML element. Defaults to { 'data-render': 'ssr' }
- * @param {bool=} options.silent Don't print timestamps
- * @returns {string}
+ * @param {Partial<Config>=} options Options
+ * @returns {Promise<string>}
  */
 module.exports.ssr = async function ssr(template, script, url, options) {
     const start = Date.now()
-    const { host, eventName, beforeEval, afterEval, meta, silent } = { ...defaults, ...options }
+    const {
+        host, eventName, beforeEval, afterEval, meta, silent, inlineDynamicImports
+    } = { ...defaults, ...options }
 
     // is this the file or the path to the file?
-    template = fs.existsSync(template) ? fs.readFileSync(template, 'utf8') : template
-    script = fs.existsSync(script) ? fs.readFileSync(script, 'utf8') : script
+    template = existsSync(template) ? readFileSync(template, 'utf8') : template
+    script = inlineDynamicImports ? await resolveScript(script)
+        : existsSync(script) ? readFileSync(script, 'utf8') : script
+
 
     return new Promise(async (resolve, reject) => {
         try {
             const dom = await new JSDOM(template, { runScripts: "outside-only", url: host + url })
-            dom.window.rendering = true;
-            dom.window.alert = (_msg) => { };
-            dom.window.scrollTo = () => { }
-            dom.window.requestAnimationFrame = () => { }
-            dom.window.cancelAnimationFrame = () => { }
-            dom.window.TextEncoder = TextEncoder
-            dom.window.TextDecoder = TextDecoder
-            dom.window.fetch = fetch
+            shimDom(dom)
+
             if (eventName)
                 dom.window.addEventListener(eventName, resolveHtml)
             await beforeEval(dom)
@@ -76,7 +69,6 @@ module.exports.ssr = async function ssr(template, script, url, options) {
                 dom.window.close()
                 if (!silent) console.log(`${url} - ${Date.now() - start}ms`)
             }
-
         } catch (err) { handleError(err, url) }
     })
 }
@@ -92,4 +84,28 @@ function setMeta(dom, meta) {
 function handleError(err, url) {
     console.log('url:', url)
     throw Error(err)
+}
+
+async function resolveScript(script) {
+    const bundlePath = getBundlePath(script)
+
+    if (!existsSync(bundlePath)) {
+        const bundle = await require('rollup').rollup({
+            input: script,
+            inlineDynamicImports: true,
+        })
+        await bundle.write({ format: 'umd', file: bundlePath })
+    }
+    return readFileSync(bundlePath, 'utf-8')
+}
+
+function shimDom(dom) {
+    dom.window.rendering = true;
+    dom.window.alert = (_msg) => { };
+    dom.window.scrollTo = () => { }
+    dom.window.requestAnimationFrame = () => { }
+    dom.window.cancelAnimationFrame = () => { }
+    dom.window.TextEncoder = TextEncoder
+    dom.window.TextDecoder = TextDecoder
+    dom.window.fetch = fetch
 }
