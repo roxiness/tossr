@@ -94,7 +94,7 @@ async function resolveScript(script) {
             input: script,
             inlineDynamicImports: true,
         })
-        await bundle.write({ format: 'umd', file: bundlePath })
+        await bundle.write({ format: 'umd', file: bundlePath, name: 'roxi-ssr' })
     }
     return readFileSync(bundlePath, 'utf-8')
 }
