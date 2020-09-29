@@ -11,6 +11,7 @@
  * @prop {object} meta Metadata to be applied to the HTML element. Defaults to { 'data-render': 'ssr' }
  * @prop {boolean} silent Don't print timestamps
  * @prop {boolean} inlineDynamicImports required for apps with dynamic imports
+ * @prop {number} timeout required for apps with dynamic imports
  */
 
 const { JSDOM } = require('jsdom')
@@ -26,7 +27,8 @@ const defaults = {
     afterEval() { },
     meta: { 'data-render': 'ssr' },
     silent: false,
-    inlineDynamicImports: false
+    inlineDynamicImports: false,
+    timeout: 5000
 }
 
 /**
@@ -40,7 +42,14 @@ const defaults = {
 module.exports.ssr = async function ssr(template, script, url, options) {
     const start = Date.now()
     const {
-        host, eventName, beforeEval, afterEval, meta, silent, inlineDynamicImports
+        host,
+        eventName,
+        beforeEval,
+        afterEval,
+        meta,
+        silent,
+        inlineDynamicImports,
+        timeout
     } = { ...defaults, ...options }
 
     // is this the file or the path to the file?
@@ -54,8 +63,15 @@ module.exports.ssr = async function ssr(template, script, url, options) {
             const dom = await new JSDOM(template, { runScripts: "outside-only", url: host + url })
             shimDom(dom)
 
-            if (eventName)
+            if (eventName) {
                 dom.window.addEventListener(eventName, resolveHtml)
+                setTimeout(() => {
+                    if (dom.window._document) {
+                        console.log(`${url} timedout after ${timeout} ms`);
+                        resolveHtml()
+                    }
+                }, timeout)
+            }
             await beforeEval(dom)
             if (meta) setMeta(dom, meta)
             dom.window.eval(script)
