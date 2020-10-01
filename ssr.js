@@ -65,12 +65,16 @@ module.exports.ssr = async function ssr(template, script, url, options) {
 
             if (eventName) {
                 dom.window.addEventListener(eventName, resolveHtml)
-                setTimeout(() => {
+                const eventTimeout = setTimeout(() => {
                     if (dom.window._document) {
                         console.log(`${url} timedout after ${timeout} ms`);
                         resolveHtml()
                     }
                 }, timeout)
+                dom.window.addEventListener(
+                    eventName,
+                    () => clearTimeout(eventTimeout)
+                )
             }
             await beforeEval(dom)
             if (meta) setMeta(dom, meta)
