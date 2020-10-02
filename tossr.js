@@ -1,19 +1,3 @@
-/**
- * Called before/after the app script is evaluated
- * @callback Eval
- * @param {object} dom The DOM object
- *
- * @typedef {object} Config
- * @prop {string} host hostname to use while rendering. Defaults to http://jsdom.ssr
- * @prop {string} eventName event to wait for before rendering app. Defaults to 'app-loaded'
- * @prop {Eval} beforeEval Executed before script is evaluated.
- * @prop {Eval} afterEval Executed after script is evaluated.
- * @prop {object} meta Metadata to be applied to the HTML element. Defaults to { 'data-render': 'ssr' }
- * @prop {boolean} silent Don't print timestamps
- * @prop {boolean} inlineDynamicImports required for apps with dynamic imports
- * @prop {number} timeout required for apps with dynamic imports
- */
-
 const { JSDOM } = require('jsdom')
 const { dirname, resolve } = require('path')
 const { existsSync, readFileSync } = require('fs')
@@ -23,8 +7,8 @@ const getBundlePath = script => resolve(dirname(script), '__roxi-ssr-bundle.js')
 const defaults = {
     host: 'http://jsdom.ssr',
     eventName: 'app-loaded',
-    beforeEval() { },
-    afterEval() { },
+    beforeEval(dom) { },
+    afterEval(dom) { },
     meta: { 'data-render': 'ssr' },
     silent: false,
     inlineDynamicImports: false,
@@ -39,20 +23,19 @@ const defaults = {
  * @param {Partial<Config>=} options Options
  * @returns {Promise<string>}
  */
-module.exports.ssr = async function ssr(template, script, url, options) {
+module.exports.tossr = async function ssr(template, script, url, options) {
     const start = Date.now()
     const {
         host,
         eventName,
         beforeEval,
         afterEval,
-        meta,
         silent,
         inlineDynamicImports,
         timeout
     } = { ...defaults, ...options }
 
-    // is this the file or the path to the file?
+    // is this the content of the file or the path to the file?
     template = existsSync(template) ? readFileSync(template, 'utf8') : template
     script = inlineDynamicImports ? await resolveScript(script)
         : existsSync(script) ? readFileSync(script, 'utf8') : script
@@ -64,20 +47,17 @@ module.exports.ssr = async function ssr(template, script, url, options) {
             shimDom(dom)
 
             if (eventName) {
-                dom.window.addEventListener(eventName, resolveHtml)
                 const eventTimeout = setTimeout(() => {
                     if (dom.window._document) {
-                        console.log(`${url} timedout after ${timeout} ms`);
+                        console.log(`${url} Waited for the event "${eventName}", but timed out after ${timeout} ms.`);
                         resolveHtml()
                     }
                 }, timeout)
-                dom.window.addEventListener(
-                    eventName,
-                    () => clearTimeout(eventTimeout)
-                )
+                dom.window.addEventListener(eventName, resolveHtml)
+                dom.window.addEventListener(eventName, () => clearTimeout(eventTimeout))
             }
+            stampWindow(dom)
             await beforeEval(dom)
-            if (meta) setMeta(dom, meta)
             dom.window.eval(script)
             if (!eventName)
                 resolveHtml()
@@ -91,14 +71,6 @@ module.exports.ssr = async function ssr(template, script, url, options) {
             }
         } catch (err) { handleError(err, url) }
     })
-}
-
-function setMeta(dom, meta) {
-    const metaElem = dom.window.document.createElement('meta')
-    Object.entries(meta).forEach(([key, value]) => {
-        metaElem.setAttribute(key, value)
-    })
-    dom.window.document.getElementsByTagName('head')[0].appendChild(metaElem)
 }
 
 function handleError(err, url) {
@@ -129,3 +101,26 @@ function shimDom(dom) {
     dom.window.TextDecoder = TextDecoder
     dom.window.fetch = fetch
 }
+
+function stampWindow(dom) {
+    const scriptElem = dom.window.document.createElement('script')
+    scriptElem.innerHTML = 'dom.window.__ssrRendered = true'
+    dom.window.document.head.appendChild(scriptElem)
+}
+
+/**
+ * @typedef {object} Config
+ * @prop {string} host hostname to use while rendering. Defaults to http://jsdom.ssr
+ * @prop {string} eventName event to wait for before rendering app. Defaults to 'app-loaded'
+ * @prop {Eval} beforeEval Executed before script is evaluated.
+ * @prop {Eval} afterEval Executed after script is evaluated.
+ * @prop {boolean} silent Don't print timestamps
+ * @prop {boolean} inlineDynamicImports required for apps with dynamic imports
+ * @prop {number} timeout required for apps with dynamic imports
+ */
+
+/**
+ * Called before/after the app script is evaluated
+ * @callback Eval
+ * @param {object} dom The DOM object
+ **/

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const ssr = require('../ssr').ssr
+const ssr = require('../tossr').tossr
 const process = require('process');
 
 const script = (function () {
@@ -17,7 +17,7 @@ try {
     '/', {
     beforeEval: dom => dom.window._myclass = 'passed-var'
   }).then(html => {
-    const expectedOutput = '<html><head><meta data-render="ssr"></head><body><canvas></canvas><div class="passed-var"></div></body></html>';
+    const expectedOutput = '<html><head><script>dom.window.__ssrRendered = true</script></head><body><canvas></canvas><div class="passed-var"></div></body></html>';
     if (html !== expectedOutput) {
       console.error(`output differs from expectation: \n expected:\t${expectedOutput}\n actual:\t${html} `)
       process.exit(1);

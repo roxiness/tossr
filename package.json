@@ -1,9 +1,10 @@
 {
-  "name": "@roxi/ssr",
-  "version": "0.2.1",
-  "description": "JSDOM SSR renderer for Svelte",
-  "main": "ssr.js",
+  "name": "tossr",
+  "version": "1.0.0",
+  "description": "Universal SSR",
+  "main": "tossr.js",
   "scripts": {
+    "build": "tsc && documentation readme tossr.js -s API",
     "test": "node test/test.js"
   },
   "repository": {
@@ -11,7 +12,7 @@
     "url": "git+https://github.com/sveltech/ssr.git"
   },
   "keywords": [
-    "svelte",
+    "spa",
     "ssr",
     "jsdom",
     "router"
@@ -27,5 +28,9 @@
     "jsdom": "^16.0.1",
     "node-fetch": "^2.6.0",
     "utf-8-validate": "^5.0.2"
+  },
+  "devDependencies": {
+    "documentation": "^13.0.2",
+    "typescript": "^4.0.3"
   }
 }
