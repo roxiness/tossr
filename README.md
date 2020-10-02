@@ -82,3 +82,8 @@ Type: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Sta
 
 -   `dom` **[object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)** The DOM object
     \*
+
+
+---
+
+<a href="https://www.freepik.com/vectors/party">Party vector created by gstudioimagen - www.freepik.com</a>
