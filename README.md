@@ -2,7 +2,8 @@
     <img src="tossr.png" alt="tossr" width="400" /><br>
 </div>
 
-#### Universal SSR
+### Universal SPA to SSR
+Render HTML from any SPA.
 
 ### Install
 
@@ -24,6 +25,10 @@ tossr(template, script, '/blog/ssr-is-fun')
 ```javascript
 dispatchEvent(new CustomEvent('app-loaded'))
 ```
+
+### Related libraries
+- [Spassr](https://github.com/roxiness/spassr) Small Express server with built in SSR
+- [Spank](https://github.com/roxiness/spank) Generate a static site from any SPA
 
 * * *
 
