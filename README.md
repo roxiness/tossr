@@ -15,7 +15,7 @@ Render HTML from any SPA.
 const { tossr } require('tossr')
 
 const template = 'dist/index.html'
-const script = './dist/app.js'
+const script = 'dist/app.js'
 const url = '/blog/ssr-is-fun'
 
 const html = await tossr(template, script, url)
