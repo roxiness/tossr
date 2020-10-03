@@ -21,10 +21,6 @@ const url = '/blog/ssr-is-fun'
 const html = await tossr(template, script, url)
 ```
 
-```javascript
-dispatchEvent(new CustomEvent('app-loaded'))
-```
-
 ### Related libraries
 - [Spassr](https://github.com/roxiness/spassr) Small Express server with built in SSR
 - [Spank](https://github.com/roxiness/spank) Generate a static site from any SPA
