@@ -13,13 +13,12 @@ Render HTML from any SPA.
 
 ```javascript
 const { tossr } require('tossr')
-const fs = require('fs')
 
-const template = fs.readFileSync('./dist/index.html')
-const script = fs.readFileSync('./dist/app.js')
+const template = 'dist/index.html'
+const script = './dist/app.js'
+const url = '/blog/ssr-is-fun'
 
-tossr(template, script, '/blog/ssr-is-fun')
-  .then(html => console.log(html + '<!--ssr rendered-->'))
+const html = await tossr(template, script, url)
 ```
 
 ```javascript
