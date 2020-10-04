@@ -1,5 +1,4 @@
 declare module "tossr" {
-    export function tossr(template: string, script: string, url: string, options?: Partial<Config> | undefined): Promise<string>;
     export type Config = {
         /**
          * hostname to use while rendering. Defaults to http://jsdom.ssr
@@ -30,7 +29,7 @@ declare module "tossr" {
          */
         timeout: number;
         /**
-         * disables caching or inlinedDynamicImports bundle
+         * disables caching of inlinedDynamicImports bundle
          */
         dev: boolean;
     };
@@ -38,4 +37,14 @@ declare module "tossr" {
      * Called before/after the app script is evaluated
      */
     export type Eval = (dom: object) => any;
+    /**
+     * Renders an HTML page from a HTML template, an app bundle and a path
+     * @param {string} template Html template (or path to a HTML template).
+     * @param {string} script Bundled JS app (or path to bundled bundle JS app).
+     * @param {string} url Path to render. Ie. /blog/breathing-oxygen-linked-to-staying-alive
+     * @param {Partial<Config>=} options Options
+     * @returns {Promise<string>}
+     */
+    export function tossr(template: string, script: string, url: string, options?: Partial<Config> | undefined): Promise<string>;
+    export function inlineScript(script: any, dev?: boolean): Promise<string>;
 }

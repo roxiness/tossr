@@ -24,7 +24,7 @@ const defaults = {
  * @param {Partial<Config>=} options Options
  * @returns {Promise<string>}
  */
-module.exports.tossr = async function ssr(template, script, url, options) {
+async function tossr(template, script, url, options) {
     const start = Date.now()
     const {
         host,
@@ -39,7 +39,7 @@ module.exports.tossr = async function ssr(template, script, url, options) {
 
     // is this the content of the file or the path to the file?
     template = existsSync(template) ? readFileSync(template, 'utf8') : template
-    script = inlineDynamicImports ? await resolveScript(script, dev)
+    script = inlineDynamicImports ? await inlineScript(script, dev)
         : existsSync(script) ? readFileSync(script, 'utf8') : script
 
 
@@ -51,7 +51,7 @@ module.exports.tossr = async function ssr(template, script, url, options) {
             if (eventName) {
                 const eventTimeout = setTimeout(() => {
                     if (dom.window._document) {
-                        console.log(`${url} Waited for the event "${eventName}", but timed out after ${timeout} ms.`);
+                        console.log(`[tossr] ${url} Waited for the event "${eventName}", but timed out after ${timeout} ms.`);
                         resolveHtml()
                     }
                 }, timeout)
@@ -69,18 +69,18 @@ module.exports.tossr = async function ssr(template, script, url, options) {
                 const html = dom.serialize()
                 resolve(html)
                 dom.window.close()
-                if (!silent) console.log(`${url} - ${Date.now() - start}ms ${(inlineDynamicImports && dev) ? '(rebuilt bundle)' : ''}`)
+                if (!silent) console.log(`[tossr] ${url} - ${Date.now() - start}ms ${(inlineDynamicImports && dev) ? '(rebuilt bundle)' : ''}`)
             }
         } catch (err) { handleError(err, url) }
     })
 }
 
 function handleError(err, url) {
-    console.log('url:', url)
+    console.log('[tossr] url:', url)
     throw Error(err)
 }
 
-async function resolveScript(script, dev) {
+async function inlineScript(script, dev = false) {
     const bundlePath = getBundlePath(script)
 
     if (!existsSync(bundlePath) || dev) {
@@ -125,3 +125,5 @@ function stampWindow(dom) {
  * @callback Eval
  * @param {object} dom The DOM object
  **/
+
+module.exports = { tossr, inlineScript }
