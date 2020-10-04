@@ -25,6 +25,7 @@
   "homepage": "https://github.com/sveltech/ssr#readme",
   "dependencies": {
     "bufferutil": "^4.0.1",
+    "esbuild": "^0.7.9",
     "jsdom": "^16.0.1",
     "node-fetch": "^2.6.0",
     "utf-8-validate": "^5.0.2"

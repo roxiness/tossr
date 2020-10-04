@@ -12,7 +12,8 @@ const defaults = {
     meta: { 'data-render': 'ssr' },
     silent: false,
     inlineDynamicImports: false,
-    timeout: 5000
+    timeout: 5000,
+    dev: false
 }
 
 /**
@@ -32,12 +33,13 @@ module.exports.tossr = async function ssr(template, script, url, options) {
         afterEval,
         silent,
         inlineDynamicImports,
-        timeout
+        timeout,
+        dev
     } = { ...defaults, ...options }
 
     // is this the content of the file or the path to the file?
     template = existsSync(template) ? readFileSync(template, 'utf8') : template
-    script = inlineDynamicImports ? await resolveScript(script)
+    script = inlineDynamicImports ? await resolveScript(script, dev)
         : existsSync(script) ? readFileSync(script, 'utf8') : script
 
 
@@ -56,8 +58,8 @@ module.exports.tossr = async function ssr(template, script, url, options) {
                 dom.window.addEventListener(eventName, resolveHtml)
                 dom.window.addEventListener(eventName, () => clearTimeout(eventTimeout))
             }
-            stampWindow(dom)
             await beforeEval(dom)
+            stampWindow(dom)
             dom.window.eval(script)
             if (!eventName)
                 resolveHtml()
@@ -67,7 +69,7 @@ module.exports.tossr = async function ssr(template, script, url, options) {
                 const html = dom.serialize()
                 resolve(html)
                 dom.window.close()
-                if (!silent) console.log(`${url} - ${Date.now() - start}ms`)
+                if (!silent) console.log(`${url} - ${Date.now() - start}ms ${(inlineDynamicImports && dev) ? '(rebuilt bundle)' : ''}`)
             }
         } catch (err) { handleError(err, url) }
     })
@@ -78,15 +80,12 @@ function handleError(err, url) {
     throw Error(err)
 }
 
-async function resolveScript(script) {
+async function resolveScript(script, dev) {
     const bundlePath = getBundlePath(script)
 
-    if (!existsSync(bundlePath)) {
-        const bundle = await require('rollup').rollup({
-            input: script,
-            inlineDynamicImports: true,
-        })
-        await bundle.write({ format: 'umd', file: bundlePath, name: 'roxi-ssr' })
+    if (!existsSync(bundlePath) || dev) {
+        const { build } = require('esbuild')
+        await build({ entryPoints: [script], outfile: bundlePath, bundle: true })
     }
     return readFileSync(bundlePath, 'utf-8')
 }
@@ -104,7 +103,8 @@ function shimDom(dom) {
 
 function stampWindow(dom) {
     const scriptElem = dom.window.document.createElement('script')
-    scriptElem.innerHTML = 'dom.window.__ssrRendered = true'
+    scriptElem.innerHTML = 'window.__ssrRendered = true'
+    dom.window.__ssrRendered = true
     dom.window.document.head.appendChild(scriptElem)
 }
 
@@ -117,6 +117,7 @@ function stampWindow(dom) {
  * @prop {boolean} silent Don't print timestamps
  * @prop {boolean} inlineDynamicImports required for apps with dynamic imports
  * @prop {number} timeout required for apps with dynamic imports
+ * @prop {boolean} dev disables caching of inlinedDynamicImports bundle
  */
 
 /**

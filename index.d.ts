@@ -29,6 +29,10 @@ declare module "tossr" {
          * required for apps with dynamic imports
          */
         timeout: number;
+        /**
+         * disables caching or inlinedDynamicImports bundle
+         */
+        dev: boolean;
     };
     /**
      * Called before/after the app script is evaluated
