@@ -32,6 +32,7 @@ declare module "tossr" {
          * disables caching of inlinedDynamicImports bundle
          */
         dev: boolean;
+        errorHandler: Function;
     };
     /**
      * Called before/after the app script is evaluated

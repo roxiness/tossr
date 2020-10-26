@@ -4,16 +4,20 @@ const { existsSync, readFileSync } = require('fs')
 const fetch = require('node-fetch')
 const getBundlePath = script => resolve(dirname(script), '__roxi-ssr-bundle.js')
 
+/** @type {Config} */
 const defaults = {
     host: 'http://jsdom.ssr',
     eventName: 'app-loaded',
     beforeEval(dom) { },
     afterEval(dom) { },
-    meta: { 'data-render': 'ssr' },
     silent: false,
     inlineDynamicImports: false,
     timeout: 5000,
-    dev: false
+    dev: false,
+    errorHandler: (err, url, ctx) => {
+        console.log('[tossr] url:', url)
+        throw Error(err)
+    }
 }
 
 /**
@@ -34,13 +38,14 @@ async function tossr(template, script, url, options) {
         silent,
         inlineDynamicImports,
         timeout,
-        dev
-    } = { ...defaults, ...options }
+        dev,
+        errorHandler
+    } = options = { ...defaults, ...options }
 
     // is this the content of the file or the path to the file?
     template = existsSync(template) ? readFileSync(template, 'utf8') : template
     script = inlineDynamicImports ? await inlineScript(script, dev)
-        : existsSync(script) ? readFileSync(script, 'utf8') : script
+        : isFile(script) ? readFileSync(script, 'utf8') : script
 
 
     return new Promise(async (resolve, reject) => {
@@ -71,13 +76,8 @@ async function tossr(template, script, url, options) {
                 dom.window.close()
                 if (!silent) console.log(`[tossr] ${url} - ${Date.now() - start}ms ${(inlineDynamicImports && dev) ? '(rebuilt bundle)' : ''}`)
             }
-        } catch (err) { handleError(err, url) }
+        } catch (err) { errorHandler(err, url, { options }) }
     })
-}
-
-function handleError(err, url) {
-    console.log('[tossr] url:', url)
-    throw Error(err)
 }
 
 async function inlineScript(script, dev = false) {
@@ -108,6 +108,17 @@ function stampWindow(dom) {
     dom.window.document.head.appendChild(scriptElem)
 }
 
+function isFile(str) {
+    const hasIllegalPathChar = str.match(/[<>:"|?*]/g);
+    const hasLineBreaks = str.match(/\n/g)
+    const isTooLong = str.length > 4096
+    const isProbablyAFile = !hasIllegalPathChar && !hasLineBreaks && !isTooLong
+    const exists = existsSync(str)
+    if (isProbablyAFile && !exists)
+        console.log(`[tossr] the script "${str}" looks like a filepath, but the file didn't exit`)
+    return exists
+}
+
 /**
  * @typedef {object} Config
  * @prop {string} host hostname to use while rendering. Defaults to http://jsdom.ssr
@@ -118,6 +129,7 @@ function stampWindow(dom) {
  * @prop {boolean} inlineDynamicImports required for apps with dynamic imports
  * @prop {number} timeout required for apps with dynamic imports
  * @prop {boolean} dev disables caching of inlinedDynamicImports bundle
+ * @prop {function} errorHandler 
  */
 
 /**

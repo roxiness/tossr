@@ -3,6 +3,7 @@
 </div>
 
 ### Universal SPA to SSR
+
 Render HTML from any SPA.
 
 ### Install
@@ -22,8 +23,9 @@ const html = await tossr(template, script, url)
 ```
 
 ### Related libraries
-- [Spassr](https://github.com/roxiness/spassr) Small Express server with built in SSR
-- [Spank](https://github.com/roxiness/spank) Generate a static site from any SPA
+
+-   [Spassr](https://github.com/roxiness/spassr) Small Express server with built in SSR
+-   [Spank](https://github.com/roxiness/spank) Generate a static site from any SPA
 
 * * *
 
@@ -66,6 +68,8 @@ Type: [object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Globa
 -   `silent` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** Don't print timestamps
 -   `inlineDynamicImports` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** required for apps with dynamic imports
 -   `timeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** required for apps with dynamic imports
+-   `dev` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** disables caching of inlinedDynamicImports bundle
+-   `errorHandler` **[function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)** 
 
 #### Eval
 
