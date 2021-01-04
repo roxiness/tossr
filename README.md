@@ -13,7 +13,7 @@ Render HTML from any SPA.
 ### Usage example
 
 ```javascript
-const { tossr } require('tossr')
+const { tossr } = require('tossr')
 
 const template = 'dist/index.html'
 const script = 'dist/app.js'
