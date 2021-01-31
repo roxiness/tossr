@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="tossr.png" alt="tossr" width="400" /><br>
+    <img src="tossr_logo.svg" alt="tossr" width="400" /><br>
 </div>
 
 ### Universal SPA to SSR
