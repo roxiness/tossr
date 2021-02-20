@@ -5,7 +5,7 @@
   "main": "tossr.js",
   "scripts": {
     "build": "tsc && documentation readme tossr.js -s API && node ./postBuild",
-    "test": "node test/test.js && node test/async-test.js"
+    "test": "node test/test.js"
   },
   "repository": {
     "type": "git",
