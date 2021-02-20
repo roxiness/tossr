@@ -1,6 +1,8 @@
 const { JSDOM } = require('jsdom')
 const { dirname, resolve } = require('path')
 const { existsSync, readFileSync } = require('fs')
+const process = require('process')
+const onetime = require('onetime')
 const fetch = require('node-fetch')
 const getBundlePath = script => resolve(dirname(script), '__roxi-ssr-bundle.js')
 
@@ -20,6 +22,25 @@ const defaults = {
     }
 }
 
+// Intercept unhandled rejections in the Node process:
+// https://nodejs.org/api/process.html#process_event_uncaughtexception.
+//
+// This is generally a bad idea in Node, but there is no other way to avoid
+// errors in jsdom causing Node to exit, which a browser would be okay with. In
+// this case, since the tossr process is probably only handling SSR requests, it
+// should be okay. To be extra safe, we don't start doing this until the first
+// time tossr is called.
+//
+// For more info see:
+// - https://github.com/jsdom/jsdom/issues/2346
+// - https://github.com/roxiness/routify-starter/issues/97
+const catchUnhandledRejections = onetime(function() {
+    process.on('unhandledRejection', (reason, promise) => {
+        console.log(`Unhandled promise rejection:`)
+        console.log(reason)
+    });
+})
+
 /**
  * Renders an HTML page from a HTML template, an app bundle and a path
  * @param {string} template Html template (or path to a HTML template).
@@ -29,6 +50,8 @@ const defaults = {
  * @returns {Promise<string>}
  */
 async function tossr(template, script, url, options) {
+    catchUnhandledRejections()
+
     const start = Date.now()
     const {
         host,
@@ -129,7 +152,7 @@ function isFile(str) {
  * @prop {boolean} inlineDynamicImports required for apps with dynamic imports
  * @prop {number} timeout required for apps with dynamic imports
  * @prop {boolean} dev disables caching of inlinedDynamicImports bundle
- * @prop {function} errorHandler 
+ * @prop {function} errorHandler
  */
 
 /**
