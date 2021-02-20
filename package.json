@@ -28,6 +28,7 @@
     "esbuild": "^0.7.9",
     "jsdom": "^16.4.0",
     "node-fetch": "^2.6.0",
+    "onetime": "^5.1.2",
     "utf-8-validate": "^5.0.2"
   },
   "devDependencies": {
