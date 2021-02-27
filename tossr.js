@@ -19,7 +19,8 @@ const defaults = {
     errorHandler: (err, url, ctx) => {
         console.log('[tossr] url:', url)
         throw Error(err)
-    }
+    },
+    disableCatchUnhandledRejections: false
 }
 
 // Intercept unhandled rejections in the Node process:
@@ -34,10 +35,11 @@ const defaults = {
 // For more info see:
 // - https://github.com/jsdom/jsdom/issues/2346
 // - https://github.com/roxiness/routify-starter/issues/97
-const catchUnhandledRejections = onetime(function() {
+const catchUnhandledRejections = onetime(function () {
     process.on('unhandledRejection', (reason, promise) => {
-        console.log(`Unhandled promise rejection:`)
-        console.log(reason)
+        console.log(`[tossr] Error on url: ${this.url}`)
+        console.log(`[tossr] Unhandled promise rejection:`)
+        console.error('[tossr]', reason)
     });
 })
 
@@ -50,8 +52,6 @@ const catchUnhandledRejections = onetime(function() {
  * @returns {Promise<string>}
  */
 async function tossr(template, script, url, options) {
-    catchUnhandledRejections()
-
     const start = Date.now()
     const {
         host,
@@ -62,8 +62,12 @@ async function tossr(template, script, url, options) {
         inlineDynamicImports,
         timeout,
         dev,
-        errorHandler
+        errorHandler,
+        disableCatchUnhandledRejections
     } = options = { ...defaults, ...options }
+
+    if (!disableCatchUnhandledRejections)
+        catchUnhandledRejections.bind({ url })()
 
     // is this the content of the file or the path to the file?
     template = existsSync(template) ? readFileSync(template, 'utf8') : template
@@ -153,6 +157,7 @@ function isFile(str) {
  * @prop {number} timeout required for apps with dynamic imports
  * @prop {boolean} dev disables caching of inlinedDynamicImports bundle
  * @prop {function} errorHandler
+ * @prop {boolean} disableCatchUnhandledRejections
  */
 
 /**
