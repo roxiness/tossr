@@ -65,7 +65,7 @@ async function tossr(template, script, url, options) {
         dev,
         errorHandler,
         disableCatchUnhandledRejections
-    } = options = configent(defaults, options)
+    } = options = configent(defaults, options, { module })
 
     if (!disableCatchUnhandledRejections)
         catchUnhandledRejections.bind({ url })()
