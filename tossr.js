@@ -4,6 +4,7 @@ const { existsSync, readFileSync } = require('fs')
 const process = require('process')
 const onetime = require('onetime')
 const fetch = require('node-fetch')
+const { configent } = require('configent')
 const getBundlePath = script => resolve(dirname(script), '__roxi-ssr-bundle.js')
 
 /** @type {Config} */
@@ -64,7 +65,7 @@ async function tossr(template, script, url, options) {
         dev,
         errorHandler,
         disableCatchUnhandledRejections
-    } = options = { ...defaults, ...options }
+    } = options = configent(defaults, options)
 
     if (!disableCatchUnhandledRejections)
         catchUnhandledRejections.bind({ url })()
