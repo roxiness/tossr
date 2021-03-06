@@ -81,6 +81,15 @@ async function tossr(template, script, url, options) {
             const dom = await new JSDOM(template, { runScripts: "outside-only", url: host + url })
             shimDom(dom)
 
+            const resolveHtml = onetime(function () {
+                afterEval(dom)
+                const html = dom.serialize()
+                resolve(html)
+                // Provide a tick for any queued jsdom operations to wrap up without error
+                setTimeout(() => dom.window.close(), 0)
+                if (!silent) console.log(`[tossr] ${url} - ${Date.now() - start}ms ${(inlineDynamicImports && dev) ? '(rebuilt bundle)' : ''}`)
+            })
+
             if (eventName) {
                 const eventTimeout = setTimeout(() => {
                     if (dom.window._document) {
@@ -97,14 +106,6 @@ async function tossr(template, script, url, options) {
             if (!eventName)
                 resolveHtml()
 
-            function resolveHtml() {
-                afterEval(dom)
-                const html = dom.serialize()
-                resolve(html)
-                // Provide a tick for any queued jsdom operations to wrap up without error
-                setTimeout(() => dom.window.close(), 0)
-                if (!silent) console.log(`[tossr] ${url} - ${Date.now() - start}ms ${(inlineDynamicImports && dev) ? '(rebuilt bundle)' : ''}`)
-            }
         } catch (err) { errorHandler(err, url, { options }) }
     })
 }
