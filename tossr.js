@@ -101,7 +101,8 @@ async function tossr(template, script, url, options) {
                 afterEval(dom)
                 const html = dom.serialize()
                 resolve(html)
-                dom.window.close()
+                // Provide a tick for any queued jsdom operations to wrap up without error
+                setTimeout(() => dom.window.close(), 0)
                 if (!silent) console.log(`[tossr] ${url} - ${Date.now() - start}ms ${(inlineDynamicImports && dev) ? '(rebuilt bundle)' : ''}`)
             }
         } catch (err) { errorHandler(err, url, { options }) }
