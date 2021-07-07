@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sveltech/ssr.git"
+    "url": "git+https://github.com/roxiness/ssr.git"
   },
   "keywords": [
     "spa",
@@ -20,9 +20,9 @@
   "author": "jakobrosenberg@gmail.com",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sveltech/ssr/issues"
+    "url": "https://github.com/roxiness/ssr/issues"
   },
-  "homepage": "https://github.com/sveltech/ssr#readme",
+  "homepage": "https://github.com/roxiness/ssr#readme",
   "dependencies": {
     "bufferutil": "^4.0.1",
     "configent": "^2.1.3",
